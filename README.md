@@ -5,6 +5,7 @@ A MobieDB app client.
 ## Dependencies
 
 ```
+flutter pub add http sqflite flutter_bloc provider
 ```
 
 Test dependencies:
