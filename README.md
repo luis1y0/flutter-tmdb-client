@@ -10,7 +10,7 @@ A MobieDB app client.
 Test dependencies:
 
 ```
-flutter pub add http dev:mockito dev:build_runner
+flutter pub add dev:mockito dev:build_runner
 ```
 
 Generating mocks:
