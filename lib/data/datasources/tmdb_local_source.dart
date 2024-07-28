@@ -20,8 +20,9 @@ class SqliteMoviesSource extends LocalMoviesSource {
   @override
   Future<List<Movie>> getFavorites() async {
     List<Map<String, Object?>> results = await _database.query('favorite');
+    List<Genre> genres = await getGenres();
     List<Movie> favorites =
-        results.map((el) => MovieModel.fromJson(el)).toList();
+        results.map((el) => MovieModel.fromJson(el, genres)).toList();
     return favorites;
   }
 

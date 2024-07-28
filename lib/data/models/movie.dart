@@ -17,22 +17,26 @@ class MovieModel extends Movie {
     required super.genres,
   });
 
-  factory MovieModel.fromJson(Map<String, dynamic> json) {
+  factory MovieModel.fromJson(
+      Map<String, dynamic> json, List<Genre> defaultGenres) {
+    String releaseDateVal = json['release_date']; // yyyy-mm-dd
+    var releaseDate = DateTime.parse(releaseDateVal);
     return MovieModel(
       id: json['id'],
       title: json['title'],
-      originalTitle: json['originalTitle'],
-      originalLanguage: json['originalLanguage'],
+      originalTitle: json['original_title'],
+      originalLanguage: json['original_language'],
       overview: json['overview'],
-      posterPath: json['posterPath'],
-      backdropPath: json['backdropPath'],
-      releaseDate: json['releaseDate'],
-      isAdult: json['isAdult'],
-      voteCount: json['voteCount'],
-      voteAverage: json['voteAverage'],
+      posterPath: json['poster_path'],
+      backdropPath: json['backdrop_path'],
+      releaseDate: releaseDate,
+      isAdult: json['adult'],
+      voteCount: json['vote_count'],
+      voteAverage: json['vote_average'],
       popularity: json['popularity'],
-      genres:
-          (json['genres'] as List).map((g) => GenreModel.fromJson(g)).toList(),
+      genres: (json['genre_ids'] as List)
+          .map((id) => defaultGenres.firstWhere((dg) => dg.id == id))
+          .toList(),
     );
   }
 }

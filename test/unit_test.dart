@@ -24,6 +24,30 @@ class MockDatabase extends Mock implements Database {}
 class MockHttpClient extends Mock implements http.Client {}
 
 void main() {
+  late List<Genre> defaultGenres;
+  setUp(() {
+    defaultGenres = [
+      Genre(id: 28, name: 'Action'),
+      Genre(id: 12, name: 'Abenteuer'),
+      Genre(id: 16, name: 'Animation'),
+      Genre(id: 35, name: 'Komödie'),
+      Genre(id: 80, name: 'Krimi'),
+      Genre(id: 99, name: 'Dokumentarfilm'),
+      Genre(id: 18, name: 'Drama'),
+      Genre(id: 10751, name: 'Familie'),
+      Genre(id: 14, name: 'Fantasy'),
+      Genre(id: 36, name: 'Historie'),
+      Genre(id: 27, name: 'Horror'),
+      Genre(id: 10402, name: 'Musik'),
+      Genre(id: 9648, name: 'Mystery'),
+      Genre(id: 10749, name: 'Liebesfilm'),
+      Genre(id: 878, name: 'Science Fiction'),
+      Genre(id: 10770, name: 'TV-Film'),
+      Genre(id: 53, name: 'Thriller'),
+      Genre(id: 10752, name: 'Kriegsfilm'),
+      Genre(id: 37, name: 'Western')
+    ];
+  });
   group('Genre', () {
     late List<Genre> testGenres;
     late LocalMoviesSource mockLocalMoviesSource;
@@ -107,17 +131,17 @@ void main() {
     });
     test('Generate properly movie properties from JSON', () {
       Map<String, dynamic> json = jsonDecode(textMovie);
-      expect(() => MovieModel.fromJson(json), returnsNormally);
-      var movie = MovieModel.fromJson(json);
+      expect(() => MovieModel.fromJson(json, defaultGenres), returnsNormally);
+      var movie = MovieModel.fromJson(json, defaultGenres);
       expect(movie.originalTitle, 'Inside Out 2');
       expect(movie.releaseDate, DateTime(2024, 6, 11));
       expect(movie.genres.map((el) => el.id).toList(), [16, 10751, 12, 35]);
     });
     test('Movie instance is parsed back and forth from local storage', () {
       Map<String, dynamic> json1 = jsonDecode(textMovie);
-      var movie1 = MovieModel.fromJson(json1);
+      var movie1 = MovieModel.fromJson(json1, defaultGenres);
       Map<String, dynamic> json2 = movie1.toMap();
-      var movie2 = MovieModel.fromJson(json2);
+      var movie2 = MovieModel.fromJson(json2, defaultGenres);
       expect(movie1, movie2);
       expect(movie1.genres, movie2.genres);
       expect(movie1.releaseDate, movie2.releaseDate);
