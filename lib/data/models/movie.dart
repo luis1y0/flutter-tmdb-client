@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:kueski_app/domain/entities/movie.dart';
 
 class MovieModel extends Movie {
@@ -38,6 +40,14 @@ class MovieModel extends Movie {
           .map((id) => defaultGenres.firstWhere((dg) => dg.id == id))
           .toList(),
     );
+  }
+
+  factory MovieModel.fromLocalJson(
+      Map<String, dynamic> json, List<Genre> defaultGenres) {
+    String genresText = json['genre_ids'];
+    List genreIds = jsonDecode(genresText);
+    json['genre_ids'] = genreIds;
+    return MovieModel.fromJson(json, defaultGenres);
   }
 }
 

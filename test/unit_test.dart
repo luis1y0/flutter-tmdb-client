@@ -140,8 +140,8 @@ void main() {
     test('Movie instance is parsed back and forth from local storage', () {
       Map<String, dynamic> json1 = jsonDecode(textMovie);
       var movie1 = MovieModel.fromJson(json1, defaultGenres);
-      Map<String, dynamic> json2 = movie1.toMap();
-      var movie2 = MovieModel.fromJson(json2, defaultGenres);
+      Map<String, dynamic> localJson = movie1.toMap();
+      var movie2 = MovieModel.fromLocalJson(localJson, defaultGenres);
       expect(movie1, movie2);
       expect(movie1.genres, movie2.genres);
       expect(movie1.releaseDate, movie2.releaseDate);

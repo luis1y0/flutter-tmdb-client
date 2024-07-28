@@ -30,22 +30,33 @@ class Movie {
   });
 
   Map<String, dynamic> toMap() {
+    String year = releaseDate.year.toString();
+    String month = releaseDate.month.toString().padLeft(2, '0');
+    String day = releaseDate.day.toString().padLeft(2, '0');
     return {
       'id': id,
       'title': title,
-      'original-title': originalTitle,
-      'original-language': originalLanguage,
+      'original_title': originalTitle,
+      'original_language': originalLanguage,
       'overview': overview,
-      'posterPath': posterPath,
-      'backdropPath': backdropPath,
-      'releaseDate': releaseDate,
+      'poster_path': posterPath,
+      'backdrop_path': backdropPath,
+      'release_date': '$year-$month-$day',
       'adult': isAdult,
-      'voteCount': voteCount,
-      'voteAverage': voteAverage,
+      'vote_count': voteCount,
+      'vote_average': voteAverage,
       'popularity': popularity,
-      'genres': genres.map((m) => m.id).toList().toString(),
+      'genre_ids': genres.map((m) => m.id).toList().toString(),
     };
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is Movie && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
 }
 
 class Genre {
@@ -65,4 +76,12 @@ class Genre {
   String toString() {
     return 'Genre($id, $name)';
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is Genre && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
 }
