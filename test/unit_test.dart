@@ -1,48 +1,91 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kueski_app/domain/entities/movie.dart';
+import 'package:kueski_app/domain/exceptions/exceptions.dart';
 import 'package:kueski_app/domain/repositories/movies_repository.dart';
 import 'package:kueski_app/data/datasources/tmdb_api_source.dart';
 import 'package:kueski_app/data/datasources/tmdb_local_source.dart';
 import 'package:kueski_app/data/repositories/tmdb_repository.dart';
+import 'package:http/http.dart' as http;
+import 'package:mocktail/mocktail.dart';
+import 'package:sqflite/sqflite.dart';
+
+class MockLocalMoviesSource extends Mock implements LocalMoviesSource {}
+
+class MockRemoteMoviesSource extends Mock implements RemoteMoviesSource {}
+
+class MockSqliteMoviesSource extends Mock implements SqliteMoviesSource {}
+
+class MockDatabase extends Mock implements Database {}
+
+class MockHttpClient extends Mock implements http.Client {}
 
 void main() {
-  late MoviesRepository moviesRepository;
-  late LocalMoviesSource localMoviesSource;
-  late RemoteMoviesSource remoteMoviesSource;
-
-  List<Genre> testGenres = [
-    Genre(id: 28, name: 'Action'),
-    Genre(id: 12, name: 'Abenteuer'),
-    Genre(id: 16, name: 'Animation'),
-    Genre(id: 35, name: 'Komödie'),
-    Genre(id: 80, name: 'Krimi'),
-    Genre(id: 99, name: 'Dokumentarfilm'),
-    Genre(id: 18, name: 'Drama'),
-    Genre(id: 10751, name: 'Familie'),
-    Genre(id: 14, name: 'Fantasy'),
-    Genre(id: 36, name: 'Historie'),
-    Genre(id: 27, name: 'Horror'),
-    Genre(id: 10402, name: 'Musik'),
-    Genre(id: 9648, name: 'Mystery'),
-    Genre(id: 10749, name: 'Liebesfilm'),
-    Genre(id: 878, name: 'Science Fiction'),
-    Genre(id: 10770, name: 'TV-Film'),
-    Genre(id: 53, name: 'Thriller'),
-    Genre(id: 10752, name: 'Kriegsfilm'),
-    Genre(id: 37, name: 'Western')
-  ];
-  setUp(() {
-    localMoviesSource = SqliteMoviesSource();
-    remoteMoviesSource = TmdbMoviesSource();
-    moviesRepository = TmdbMoviesRepository(
-      localMoviesSource,
-      remoteMoviesSource,
-    );
-  });
   group('Genre', () {
-    test('Get Genres', () async {
-      var genres = await moviesRepository.getGenres();
-      expect(genres, testGenres);
+    late List<Genre> testGenres;
+    late LocalMoviesSource mockLocalMoviesSource;
+    late RemoteMoviesSource mockRemoteMoviesSource;
+    late SqliteMoviesSource mockSqliteMoviesSource;
+    late Database mockDatabase;
+    late http.Client mockHttpClient;
+    late String genreBody;
+    setUp(() {
+      mockHttpClient = MockHttpClient();
+      mockDatabase = MockDatabase();
+      mockSqliteMoviesSource = MockSqliteMoviesSource();
+      mockRemoteMoviesSource = MockRemoteMoviesSource();
+      mockLocalMoviesSource = MockLocalMoviesSource();
+      testGenres = [
+        Genre(id: 28, name: 'Action'),
+        Genre(id: 12, name: 'Abenteuer'),
+        Genre(id: 16, name: 'Animation'),
+        Genre(id: 35, name: 'Komödie'),
+      ];
+      when(() => mockLocalMoviesSource.getGenres()).thenAnswer(
+        (_) async => testGenres,
+      );
+      when(
+        () => mockDatabase.query(any()),
+      ).thenAnswer((_) async => []);
+      File genreFile = File('./test/genres.json');
+      genreBody = genreFile.readAsStringSync();
+      registerFallbackValue(Uri());
     });
+    test('Get Genres first from Local', () async {
+      MoviesRepository moviesRep =
+          TmdbMoviesRepository(mockLocalMoviesSource, mockRemoteMoviesSource);
+      var genres = await moviesRep.getGenres();
+      expect(genres.length, testGenres.length);
+      expect(genres.first.id, testGenres.first.id);
+    });
+    test('EmptyCacheException when empty genre cache', () async {
+      LocalMoviesSource localMoviesSource = SqliteMoviesSource(mockDatabase);
+      expect(
+          localMoviesSource.getGenres(), throwsA(isA<EmptyCacheException>()));
+    });
+    test('Get Genres from API when empty cache', () async {
+      when(
+        () => mockDatabase.delete(any()),
+      ).thenAnswer((_) async => 0);
+      when(
+        () => mockDatabase.insert(any(), any(),
+            conflictAlgorithm: any(named: 'conflictAlgorithm')),
+      ).thenAnswer((Invocation invocation) async => 0);
+      when(
+        () => mockHttpClient.get(any<Uri>()),
+      ).thenAnswer((_) async => http.Response(genreBody, 200));
+      MoviesRepository repository = TmdbMoviesRepository(
+          SqliteMoviesSource(mockDatabase), TmdbMoviesSource(mockHttpClient));
+      List<Genre> genres = await repository.getGenres();
+      expect(19, genres.length,
+          reason: 'Genres are not read from test/genres.json file');
+    });
+  });
+  group('Movies', () {
+    //
+  });
+  group('Favorites', () {
+    //
   });
 }

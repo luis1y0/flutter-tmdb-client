@@ -12,7 +12,7 @@ class TmdbMoviesRepository extends MoviesRepository {
   @override
   Future<List<Genre>> getGenres() async {
     try {
-      return _localMoviesSource.getGenres();
+      return await _localMoviesSource.getGenres();
     } catch (_) {
       List<Genre> genres = await _remoteMoviesSource.getGenres();
       _localMoviesSource.setGenres(genres);

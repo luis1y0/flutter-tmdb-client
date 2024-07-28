@@ -28,6 +28,24 @@ class Movie {
     required this.popularity,
     required this.genres,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'title': title,
+      'originalTitle': originalTitle,
+      'originalLanguage': originalLanguage,
+      'overview': overview,
+      'posterPath': posterPath,
+      'backdropPath': backdropPath,
+      'releaseDate': releaseDate,
+      'isAdult': isAdult,
+      'voteCount': voteCount,
+      'voteAverage': voteAverage,
+      'popularity': popularity,
+      'genres': genres.map((m) => m.id).toList().toString(),
+    };
+  }
 }
 
 class Genre {
@@ -38,4 +56,13 @@ class Genre {
     required this.id,
     required this.name,
   });
+
+  Map<String, dynamic> toMap() {
+    return {'id': id, 'name': name};
+  }
+
+  @override
+  String toString() {
+    return 'Genre($id, $name)';
+  }
 }

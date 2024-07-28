@@ -8,6 +8,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String _name = 'Brenda';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,7 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('MovieDbAPI'),
       ),
       body: const Center(
-        child: Text('HomeScreen'),
+        child: Text('Brenda'),
       ),
     );
   }
