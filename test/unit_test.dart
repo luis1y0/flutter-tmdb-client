@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:kueski_app/data/models/movie.dart';
 import 'package:kueski_app/domain/entities/movie.dart';
 import 'package:kueski_app/domain/exceptions/exceptions.dart';
 import 'package:kueski_app/domain/repositories/movies_repository.dart';
@@ -26,14 +28,12 @@ void main() {
     late List<Genre> testGenres;
     late LocalMoviesSource mockLocalMoviesSource;
     late RemoteMoviesSource mockRemoteMoviesSource;
-    late SqliteMoviesSource mockSqliteMoviesSource;
     late Database mockDatabase;
     late http.Client mockHttpClient;
     late String genreBody;
     setUp(() {
       mockHttpClient = MockHttpClient();
       mockDatabase = MockDatabase();
-      mockSqliteMoviesSource = MockSqliteMoviesSource();
       mockRemoteMoviesSource = MockRemoteMoviesSource();
       mockLocalMoviesSource = MockLocalMoviesSource();
       testGenres = [
@@ -83,9 +83,62 @@ void main() {
     });
   });
   group('Movies', () {
-    //
-  });
-  group('Favorites', () {
-    //
+    late String textMovies;
+    late String textMovie;
+    late TmdbMoviesSource tmdbMoviesSource;
+    late MockHttpClient mockHttpClient;
+    setUp(() {
+      mockHttpClient = MockHttpClient();
+      tmdbMoviesSource = TmdbMoviesSource(mockHttpClient);
+      textMovie = '{"adult": false,"backdrop_path": '
+          '"/xg27NrXi7VXCGUr7MG75UqLl6Vg.jpg","genre_ids": [16,10751,12,35],"id":'
+          '1022789,"original_language": "en","original_title": "Inside Out 2",'
+          '"overview": "Teenager Riley\'s mind headquarters is undergoing a sudden '
+          'demolition to make room for something entirely unexpected: new Emotions!'
+          ' Joy, Sadness, Anger, Fear and Disgust, who’ve long been running a '
+          'successful operation by all accounts, aren’t sure how to feel when '
+          'Anxiety shows up. And it looks like she’s not alone.","popularity": '
+          '4645.667,"poster_path": "/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg",'
+          '"release_date": "2024-06-11","title": "Inside Out 2","video": '
+          'false,"vote_average": 7.64,"vote_count": 2069}';
+      File fileMovies = File('./test/popular_movies.json');
+      textMovies = fileMovies.readAsStringSync();
+      registerFallbackValue(Uri());
+    });
+    test('Generate properly movie properties from JSON', () {
+      Map<String, dynamic> json = jsonDecode(textMovie);
+      expect(() => MovieModel.fromJson(json), returnsNormally);
+      var movie = MovieModel.fromJson(json);
+      expect(movie.originalTitle, 'Inside Out 2');
+      expect(movie.releaseDate, DateTime(2024, 6, 11));
+      expect(movie.genres.map((el) => el.id).toList(), [16, 10751, 12, 35]);
+    });
+    test('Movie instance is parsed back and forth from local storage', () {
+      Map<String, dynamic> json1 = jsonDecode(textMovie);
+      var movie1 = MovieModel.fromJson(json1);
+      Map<String, dynamic> json2 = movie1.toMap();
+      var movie2 = MovieModel.fromJson(json2);
+      expect(movie1, movie2);
+      expect(movie1.genres, movie2.genres);
+      expect(movie1.releaseDate, movie2.releaseDate);
+    });
+    test('ServiceException when http code is not 200', () {
+      when(() => mockHttpClient.get(any()))
+          .thenAnswer((_) async => http.Response('Not Found', 404));
+      expect(() => tmdbMoviesSource.getPopularMovies(1),
+          throwsA(isA<ServiceException>()));
+    });
+    test('Exception when an unknown error happened', () {
+      when(() => mockHttpClient.get(any())).thenThrow(Exception());
+      expectLater(tmdbMoviesSource.getPopularMovies(1),
+          throwsA(isA<ServiceException>()));
+    });
+    test('Movie list parsed correctly', () async {
+      when(() => mockHttpClient.get(any()))
+          .thenAnswer((_) async => http.Response(textMovies, 200));
+      List<Movie> movies = await tmdbMoviesSource.getPopularMovies(1);
+      expect(movies.length, 20);
+      expect(movies.first.title, 'Inside Out 2');
+    });
   });
 }
