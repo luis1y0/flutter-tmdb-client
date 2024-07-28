@@ -11,13 +11,13 @@ flutter pub add http sqflite flutter_bloc provider
 Test dependencies:
 
 ```
-flutter pub add dev:mockito dev:build_runner
+flutter pub add dev:mocktail
 ```
 
-Generating mocks:
+Running Unit Tests:
 
 ```
-dart run build_runner build
+flutter test test/unit_test.dart --dart-define=API_KEY=<key>
 ```
 
 ## Workflow
