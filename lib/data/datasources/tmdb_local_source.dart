@@ -15,37 +15,7 @@ abstract class LocalMoviesSource {
 class SqliteMoviesSource extends LocalMoviesSource {
   final Database _database;
 
-  SqliteMoviesSource(this._database) {
-    //getDatabasesPath().then((path) =>
-    //    openDatabase('$path/movies.db', onCreate: _onCreateDatabase)
-    //        .then(_initDatabase));
-  }
-
-  FutureOr<void> _onCreateDatabase(Database db, int version) {
-    db.execute('''CREATE TABLE genre (
-    id INTEGER PRIMARY KEY NOT NULL,
-    name TEXT NOT NULL
-    )''');
-    db.execute('''CREATE TABLE favorite (
-      id INTEGER PRIMARY KEY NOT NULL,
-      title TEXT NOT NULL,
-      originalTitle TEXT NOT NULL,
-      originalLanguage TEXT NOT NULL,
-      overview TEXT NOT NULL,
-      posterPath TEXT NOT NULL,
-      backdropPath TEXT NOT NULL,
-      releaseDate TEXT NOT NULL,
-      isAdult TEXT NOT NULL,
-      voteCount TEXT NOT NULL,
-      voteAverage REAL NOT NULL,
-      popularity REAL NOT NULL,
-      genres TEXT NOT NULL
-    )''');
-  }
-
-  void _initDatabase(Database db) {
-    //_database = db;
-  }
+  SqliteMoviesSource(this._database);
 
   @override
   Future<List<Movie>> getFavorites() async {
