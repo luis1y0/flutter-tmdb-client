@@ -154,7 +154,7 @@ void main() {
     });
     test('Exception when an unknown error happened', () {
       when(() => mockHttpClient.get(any())).thenThrow(Exception());
-      expectLater(tmdbMoviesSource.getPopularMovies(1),
+      expectLater(() => tmdbMoviesSource.getPopularMovies(1),
           throwsA(isA<ServiceException>()));
     });
     test('Movie list parsed correctly', () async {
