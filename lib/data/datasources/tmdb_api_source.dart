@@ -16,6 +16,9 @@ class TmdbMoviesSource extends RemoteMoviesSource {
   final http.Client _client;
   late final String _apiKey;
   final String _apiUrl = 'https://api.themoviedb.org/3';
+  late List<Genre> _genres;
+
+  set genres(List<Genre> genres) => _genres = genres;
 
   TmdbMoviesSource(this._client) {
     _apiKey = Uri.encodeQueryComponent(const String.fromEnvironment('API_KEY'));
@@ -74,7 +77,7 @@ class TmdbMoviesSource extends RemoteMoviesSource {
         List jsonList = jsonResponse['results'];
         List<Movie> movies = [];
         for (Map<String, dynamic> item in jsonList) {
-          movies.add(MovieModel.fromJson(item, []));
+          movies.add(MovieModel.fromJson(item, _genres));
         }
         return movies;
       } else if (response.statusCode == 500) {
@@ -88,7 +91,7 @@ class TmdbMoviesSource extends RemoteMoviesSource {
       throw ServiceException('Check you have stable network connection');
     } on ServiceException {
       rethrow;
-    } catch (e) {
+    } catch (_) {
       throw ServiceException('Unexpected error, try again');
     }
   }

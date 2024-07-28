@@ -160,7 +160,11 @@ void main() {
     test('Movie list parsed correctly', () async {
       when(() => mockHttpClient.get(any()))
           .thenAnswer((_) async => http.Response(textMovies, 200));
-      List<Movie> movies = await tmdbMoviesSource.getPopularMovies(1);
+      TmdbMoviesSource remoteMoviesSource = TmdbMoviesSource(mockHttpClient);
+      remoteMoviesSource.genres = defaultGenres;
+      MoviesRepository repository =
+          TmdbMoviesRepository(MockLocalMoviesSource(), remoteMoviesSource);
+      List<Movie> movies = await repository.getPopularMovies(1);
       expect(movies.length, 20);
       expect(movies.first.title, 'Inside Out 2');
     });
