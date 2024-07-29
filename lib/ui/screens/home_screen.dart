@@ -27,10 +27,10 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         children: const [
           MoviesWidget(
-            key: Key('nowPlaing'),
+            title: 'Now Playing Movies',
           ),
           MoviesWidget(
-            key: Key('popular'),
+            title: 'Popular Movies',
           ),
         ],
       ),
