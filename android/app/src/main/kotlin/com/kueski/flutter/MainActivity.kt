@@ -1,4 +1,4 @@
-package com.example.kueski_app
+package com.kueski.flutter
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kueski_app/data/datasources/sqlitedb_singleton.dart';
@@ -5,6 +6,7 @@ import 'package:kueski_app/data/datasources/tmdb_api_source.dart';
 import 'package:kueski_app/data/datasources/tmdb_local_source.dart';
 import 'package:kueski_app/data/repositories/tmdb_repository.dart';
 import 'package:kueski_app/domain/repositories/movies_repository.dart';
+import 'package:kueski_app/firebase_options.dart';
 import 'package:kueski_app/ui/blocs/favorites_bloc.dart';
 import 'package:kueski_app/ui/blocs/pages_bloc.dart';
 import 'package:kueski_app/ui/screens/home_screen.dart';
@@ -13,6 +15,9 @@ import 'package:http/http.dart' as http;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   SqliteDbSingleton sqliteDbSingleton = SqliteDbSingleton.instance();
   await sqliteDbSingleton.initialize();
   TmdbMoviesSource tmdbMoviesSource = TmdbMoviesSource(http.Client());

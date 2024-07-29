@@ -7,7 +7,11 @@
         {
             "name": "kueski_app",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "toolArgs": [
+                "--dart-define",
+                "API_KEY=e8e2d9157719b8cdc1bfa2a5e36e936b",
+            ]
         },
         {
             "name": "kueski_app (profile mode)",
