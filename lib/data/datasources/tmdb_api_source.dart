@@ -16,7 +16,7 @@ class TmdbMoviesSource extends RemoteMoviesSource {
   final http.Client _client;
   late final String _apiKey;
   final String _apiUrl = 'https://api.themoviedb.org/3';
-  late List<Genre> _genres;
+  List<Genre>? _genres;
 
   set genres(List<Genre> genres) => _genres = genres;
 
@@ -26,18 +26,31 @@ class TmdbMoviesSource extends RemoteMoviesSource {
 
   @override
   Future<List<Genre>> getGenres() async {
-    var uri = Uri.parse('$_apiUrl/movie/list?language=en&api_key=$_apiKey');
-    var response = await _client.get(uri);
-    if (response.statusCode == 200) {
-      //
+    try {
+      var uri = Uri.parse('$_apiUrl/genre/list?language=en&api_key=$_apiKey');
+      var response = await _client.get(uri);
+      if (response.statusCode == 200) {
+        Map<String, dynamic> json = jsonDecode(response.body);
+        List genresJson = json['genres'];
+        List<Genre> genres = [];
+        for (Map<String, dynamic> genreJson in genresJson) {
+          genres.add(GenreModel.fromJson(genreJson));
+        }
+        return genres;
+      } else if (response.statusCode == 500) {
+        throw ServiceException('Service unavailable, tray again later');
+      } else if (response.statusCode == 404) {
+        throw ServiceException('Movie information not available');
+      } else {
+        throw ServiceException('Service error, conctact support');
+      }
+    } on SocketException {
+      throw ServiceException('Check you have stable network connection');
+    } on ServiceException {
+      rethrow;
+    } catch (_) {
+      throw ServiceException('Unexpected error, try again');
     }
-    Map<String, dynamic> json = jsonDecode(response.body);
-    List genresJson = json['genres'];
-    List<Genre> genres = [];
-    for (Map<String, dynamic> genreJson in genresJson) {
-      genres.add(GenreModel.fromJson(genreJson));
-    }
-    return genres;
   }
 
   @override
@@ -71,13 +84,14 @@ class TmdbMoviesSource extends RemoteMoviesSource {
 
   Future<List<Movie>> _fetchMovies(Uri url, int page) async {
     try {
+      _genres ??= await getGenres();
       var response = await _client.get(url);
       if (response.statusCode == 200) {
         Map<String, dynamic> jsonResponse = jsonDecode(response.body);
         List jsonList = jsonResponse['results'];
         List<Movie> movies = [];
         for (Map<String, dynamic> item in jsonList) {
-          movies.add(MovieModel.fromJson(item, _genres));
+          movies.add(MovieModel.fromJson(item, _genres!));
         }
         return movies;
       } else if (response.statusCode == 500) {

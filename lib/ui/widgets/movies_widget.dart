@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kueski_app/domain/entities/movie.dart';
+import 'package:kueski_app/domain/repositories/movies_repository.dart';
 import 'package:kueski_app/ui/blocs/type_view_bloc.dart';
+import 'package:kueski_app/ui/screens/detail_screen.dart';
+import 'package:provider/provider.dart';
 
 class MoviesWidget extends StatelessWidget {
   final String title;
@@ -51,10 +55,31 @@ class MoviesWidget extends StatelessWidget {
             bloc: typeViewBloc,
             builder: (context, state) {
               if (state == TypeViewState.listView) {
-                return ListView.builder(
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text('Item ${index + 1}'),
+                return FutureBuilder<List<Movie>>(
+                  future: Provider.of<MoviesRepository>(context)
+                      .getNowPlayingMovies(1),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    List<Movie> movies = snapshot.data!;
+                    return ListView.builder(
+                      itemCount: movies.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          title: Text(movies[index].title),
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    DetailScreen(movie: movies[index]),
+                              ),
+                            );
+                          },
+                        );
+                      },
                     );
                   },
                 );
