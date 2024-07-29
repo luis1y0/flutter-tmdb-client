@@ -5,7 +5,7 @@ A MobieDB app client.
 ## Dependencies
 
 ```
-flutter pub add http sqflite flutter_bloc provider
+flutter pub add http sqflite bloc flutter_bloc provider
 ```
 
 Test dependencies:
@@ -18,6 +18,12 @@ Running Unit Tests:
 
 ```
 flutter test test/unit_test.dart --dart-define=API_KEY=<key>
+```
+
+Execute:
+
+```
+flutter run --dart-define=API_KEY=<key>
 ```
 
 ## Workflow
