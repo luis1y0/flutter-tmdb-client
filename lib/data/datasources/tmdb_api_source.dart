@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:kueski_app/data/models/movie.dart';
 import 'package:kueski_app/domain/entities/movie.dart';
@@ -21,7 +21,7 @@ class TmdbMoviesSource extends RemoteMoviesSource {
   set genres(List<Genre> genres) => _genres = genres;
 
   TmdbMoviesSource(this._client) {
-    _apiKey = Uri.encodeQueryComponent(const String.fromEnvironment('API_KEY'));
+    _apiKey = Uri.encodeQueryComponent(dotenv.env['API_KEY']!);
   }
 
   @override

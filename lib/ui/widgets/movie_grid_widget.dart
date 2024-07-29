@@ -24,7 +24,16 @@ class MovieGridWidget extends StatelessWidget {
         }
         return true;
       },
-      child: BlocBuilder<PaginationViewBloc, PaginationState>(
+      child: BlocConsumer<PaginationViewBloc, PaginationState>(
+        listenWhen: (previous, current) => current is ErrorState,
+        listener: (context, state) {
+          if (state is ErrorState) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(state.message),
+            ));
+          }
+        },
+        buildWhen: (previous, current) => current is! ErrorState,
         builder: (context, state) {
           if (state is ListPaginationState && state.movies.isEmpty) {
             String page = paginationBloc.pageName.toString();

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:kueski_app/domain/entities/movie.dart';
+import 'package:kueski_app/domain/exceptions/exceptions.dart';
 import 'package:kueski_app/domain/repositories/movies_repository.dart';
 
 sealed class PaginationEvent {}
@@ -30,6 +31,12 @@ class FetchingPaginationState extends PaginationState {
   FetchingPaginationState(super.movies);
 }
 
+class ErrorState extends PaginationState {
+  final String message;
+
+  ErrorState(this.message) : super([]);
+}
+
 enum PageName { nowPlaying, popular, favorite }
 
 class PaginationViewBloc extends Bloc<PaginationEvent, PaginationState> {
@@ -48,18 +55,22 @@ class PaginationViewBloc extends Bloc<PaginationEvent, PaginationState> {
 
   FutureOr<void> _addFirstPage(
       AddFirstPageEvent event, Emitter<PaginationState> emit) async {
-    switch (pageName) {
-      case PageName.nowPlaying:
-        movies.addAll(await _repository.getNowPlayingMovies(_currentPage));
-        break;
-      case PageName.popular:
-        movies.addAll(await _repository.getPopularMovies(_currentPage));
-        break;
-      case PageName.favorite:
-        movies.addAll(await _repository.getFavorites());
-        break;
+    try {
+      switch (pageName) {
+        case PageName.nowPlaying:
+          movies.addAll(await _repository.getNowPlayingMovies(_currentPage));
+          break;
+        case PageName.popular:
+          movies.addAll(await _repository.getPopularMovies(_currentPage));
+          break;
+        case PageName.favorite:
+          movies.addAll(await _repository.getFavorites());
+          break;
+      }
+      emit(ListPaginationState(movies));
+    } on ServiceException catch (e) {
+      emit(ErrorState(e.message));
     }
-    emit(ListPaginationState(movies));
   }
 
   FutureOr<void> _nearEndOfPage(
@@ -69,31 +80,39 @@ class PaginationViewBloc extends Bloc<PaginationEvent, PaginationState> {
     }
     emit(FetchingPaginationState(state.movies));
     _currentPage++;
-    switch (pageName) {
-      case PageName.nowPlaying:
-        movies.addAll(await _repository.getNowPlayingMovies(_currentPage));
-        break;
-      case PageName.popular:
-        movies.addAll(await _repository.getPopularMovies(_currentPage));
-        break;
-      case PageName.favorite:
-        return;
+    try {
+      switch (pageName) {
+        case PageName.nowPlaying:
+          movies.addAll(await _repository.getNowPlayingMovies(_currentPage));
+          break;
+        case PageName.popular:
+          movies.addAll(await _repository.getPopularMovies(_currentPage));
+          break;
+        case PageName.favorite:
+          return;
+      }
+      emit(ListPaginationState(movies));
+    } on ServiceException catch (e) {
+      emit(ErrorState(e.message));
     }
-    emit(ListPaginationState(movies));
   }
 
   FutureOr<void> _refreshPage(
       RefreshPageEvent event, Emitter<PaginationState> emit) async {
-    switch (pageName) {
-      case PageName.nowPlaying:
-        break;
-      case PageName.popular:
-        break;
-      case PageName.favorite:
-        movies.clear();
-        movies.addAll(await _repository.getFavorites());
-        break;
+    try {
+      switch (pageName) {
+        case PageName.nowPlaying:
+          break;
+        case PageName.popular:
+          break;
+        case PageName.favorite:
+          movies.clear();
+          movies.addAll(await _repository.getFavorites());
+          break;
+      }
+      emit(ListPaginationState(movies));
+    } on ServiceException catch (e) {
+      emit(ErrorState(e.message));
     }
-    emit(ListPaginationState(movies));
   }
 }

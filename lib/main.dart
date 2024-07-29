@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kueski_app/data/datasources/sqlitedb_singleton.dart';
 import 'package:kueski_app/data/datasources/tmdb_api_source.dart';
 import 'package:kueski_app/data/datasources/tmdb_local_source.dart';
@@ -13,6 +14,7 @@ import 'package:http/http.dart' as http;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   SqliteDbSingleton sqliteDbSingleton = SqliteDbSingleton.instance();
   await sqliteDbSingleton.initialize();
   TmdbMoviesSource tmdbMoviesSource = TmdbMoviesSource(http.Client());
@@ -20,7 +22,9 @@ Future<void> main() async {
     SqliteMoviesSource(sqliteDbSingleton.database),
     tmdbMoviesSource,
   );
-  tmdbMoviesSource.genres = await moviesRepository.getGenres();
+  try {
+    tmdbMoviesSource.genres = await moviesRepository.getGenres();
+  } catch (_) {}
   runApp(Application(
     moviesRepository: moviesRepository,
   ));

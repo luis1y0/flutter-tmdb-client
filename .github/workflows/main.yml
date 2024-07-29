@@ -16,20 +16,16 @@ jobs:
         with:
           distribution: "zulu"
           java-version: "11"
-      - name: Decode google-services.json
-        env: 
-            GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-        run: echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
-      - name: Decode firebase_option
+      - name: Decode .env
         env:
-          firebase_options_dart: ${{secrets.FIREBASE_OPTION}}
-        run : echo "$firebase_options_dart" > lib/firebase_options.dart
+          env_file: ${{secrets.ENV_FILE}}
+        run : echo "$env_file" > .env
 
       - uses: subosito/flutter-action@v2
         with:
           channel: "stable"
       - run: flutter pub get
-      - run: flutter build apk --dart-define=API_KEY=${{ secrets.API_KEY }}
+      - run: flutter build apk
       - uses: actions/upload-artifact@v1
         with:
           name: release-apk
