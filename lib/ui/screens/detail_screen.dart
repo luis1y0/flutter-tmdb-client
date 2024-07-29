@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kueski_app/domain/entities/movie.dart';
+import 'package:kueski_app/ui/blocs/favorites_bloc.dart';
 import 'package:kueski_app/ui/widgets/movie_card_widget.dart';
 
 class DetailScreen extends StatefulWidget {
@@ -17,9 +19,33 @@ class _DetailScreenState extends State<DetailScreen> {
   );
   @override
   Widget build(BuildContext context) {
+    var favoritesBloc = BlocProvider.of<FavoritesBloc>(
+      context,
+      listen: false,
+    );
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.movie.title),
+        actions: [
+          BlocBuilder<FavoritesBloc, FavoriteState>(
+            builder: (context, state) {
+              bool liked = state.movies.any((el) => el.id == widget.movie.id);
+              return IconButton(
+                icon: Icon(
+                  Icons.favorite,
+                  color: liked ? Colors.pinkAccent : null,
+                ),
+                onPressed: () {
+                  if (liked) {
+                    favoritesBloc.add(DislikeEvent(widget.movie));
+                  } else {
+                    favoritesBloc.add(LikeEvent(widget.movie));
+                  }
+                },
+              );
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),

@@ -21,8 +21,25 @@ class SqliteMoviesSource extends LocalMoviesSource {
   Future<List<Movie>> getFavorites() async {
     List<Map<String, Object?>> results = await _database.query('favorite');
     List<Genre> genres = await getGenres();
-    List<Movie> favorites =
-        results.map((el) => MovieModel.fromJson(el, genres)).toList();
+    List<Movie> favorites = [];
+    for (Map<String, Object?> item in results) {
+      Map<String, dynamic> values = {
+        'id': item['id'],
+        'title': item['title'],
+        'original_title': item['originalTitle'],
+        'original_language': item['originalLanguage'],
+        'overview': item['overview'],
+        'poster_path': item['posterPath'],
+        'backdrop_path': item['backdropPath'],
+        'release_date': item['releaseDate'],
+        'adult': bool.parse(item['isAdult'].toString()),
+        'vote_count': item['voteCount'],
+        'vote_average': item['voteAverage'],
+        'popularity': item['popularity'],
+        'genre_ids': item['genres'],
+      };
+      favorites.add(MovieModel.fromLocalJson(values, genres));
+    }
     return favorites;
   }
 
@@ -39,10 +56,31 @@ class SqliteMoviesSource extends LocalMoviesSource {
   @override
   Future<List<Movie>> setFavorite(Movie movie, bool isFavorite) {
     if (isFavorite) {
-      _database.delete('favorite', where: 'id = ?', whereArgs: [movie.id]);
+      String year = movie.releaseDate.year.toString();
+      String month = movie.releaseDate.month.toString().padLeft(2, '0');
+      String day = movie.releaseDate.day.toString().padLeft(2, '0');
+      Map<String, dynamic> values = {
+        'id': movie.id,
+        'title': movie.title,
+        'originalTitle': movie.originalTitle,
+        'originalLanguage': movie.originalLanguage,
+        'overview': movie.overview,
+        'posterPath': movie.posterPath,
+        'backdropPath': movie.backdropPath,
+        'releaseDate': '$year-$month-$day',
+        'isAdult': movie.isAdult.toString(),
+        'voteCount': movie.voteCount,
+        'voteAverage': movie.voteAverage,
+        'popularity': movie.popularity,
+        'genres': movie.genres.map((el) => el.id).toList().toString(),
+      };
+      _database.insert(
+        'favorite',
+        values,
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
     } else {
-      _database.insert('favorite', movie.toMap(),
-          conflictAlgorithm: ConflictAlgorithm.ignore);
+      _database.delete('favorite', where: 'id = ?', whereArgs: [movie.id]);
     }
     return getFavorites();
   }

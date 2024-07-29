@@ -43,7 +43,7 @@ class SqliteDbSingleton {
       backdropPath TEXT NOT NULL,
       releaseDate TEXT NOT NULL,
       isAdult TEXT NOT NULL,
-      voteCount TEXT NOT NULL,
+      voteCount INTEGER NOT NULL,
       voteAverage REAL NOT NULL,
       popularity REAL NOT NULL,
       genres TEXT NOT NULL

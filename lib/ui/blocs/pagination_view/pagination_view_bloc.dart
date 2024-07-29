@@ -10,6 +10,8 @@ class AddFirstPageEvent extends PaginationEvent {}
 
 class NearPageEndEvent extends PaginationEvent {}
 
+class RefreshPageEvent extends PaginationEvent {}
+
 sealed class PaginationState {
   final List<Movie> movies;
 
@@ -28,7 +30,7 @@ class FetchingPaginationState extends PaginationState {
   FetchingPaginationState(super.movies);
 }
 
-enum PageName { nowPlaying, popular }
+enum PageName { nowPlaying, popular, favorite }
 
 class PaginationViewBloc extends Bloc<PaginationEvent, PaginationState> {
   final PageName pageName;
@@ -40,6 +42,7 @@ class PaginationViewBloc extends Bloc<PaginationEvent, PaginationState> {
       : super(LoadingPaginationState([])) {
     on<AddFirstPageEvent>(_addFirstPage);
     on<NearPageEndEvent>(_nearEndOfPage);
+    on<RefreshPageEvent>(_refreshPage);
     add(AddFirstPageEvent());
   }
 
@@ -51,6 +54,9 @@ class PaginationViewBloc extends Bloc<PaginationEvent, PaginationState> {
         break;
       case PageName.popular:
         movies.addAll(await _repository.getPopularMovies(_currentPage));
+        break;
+      case PageName.favorite:
+        movies.addAll(await _repository.getFavorites());
         break;
     }
     emit(ListPaginationState(movies));
@@ -69,6 +75,23 @@ class PaginationViewBloc extends Bloc<PaginationEvent, PaginationState> {
         break;
       case PageName.popular:
         movies.addAll(await _repository.getPopularMovies(_currentPage));
+        break;
+      case PageName.favorite:
+        return;
+    }
+    emit(ListPaginationState(movies));
+  }
+
+  FutureOr<void> _refreshPage(
+      RefreshPageEvent event, Emitter<PaginationState> emit) async {
+    switch (pageName) {
+      case PageName.nowPlaying:
+        break;
+      case PageName.popular:
+        break;
+      case PageName.favorite:
+        movies.clear();
+        movies.addAll(await _repository.getFavorites());
         break;
     }
     emit(ListPaginationState(movies));

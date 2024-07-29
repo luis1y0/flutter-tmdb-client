@@ -18,18 +18,27 @@ class MovieGridWidget extends StatelessWidget {
         double total = notification.metrics.maxScrollExtent;
         double position = notification.metrics.pixels;
         paginationBloc.scrollPosition = position;
-        if (total - position < 10) {
+        if (total - position < 10 &&
+            paginationBloc.pageName != PageName.favorite) {
           paginationBloc.add(NearPageEndEvent());
         }
         return true;
       },
       child: BlocBuilder<PaginationViewBloc, PaginationState>(
         builder: (context, state) {
+          if (state is ListPaginationState && state.movies.isEmpty) {
+            String page = paginationBloc.pageName.toString();
+            page = page.split('.')[1];
+            return Center(
+              child: Text('There are no $page movies.'),
+            );
+          }
+          bool extra = paginationBloc.pageName != PageName.favorite;
           return GridView.builder(
             controller: ScrollController(
               initialScrollOffset: paginationBloc.scrollPosition,
             ),
-            itemCount: state.movies.length + 1,
+            itemCount: state.movies.length + (extra ? 1 : 0),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
             ),
