@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kueski_app/domain/entities/movie.dart';
-import 'package:kueski_app/domain/repositories/movies_repository.dart';
 import 'package:kueski_app/ui/blocs/type_view_bloc.dart';
-import 'package:kueski_app/ui/screens/detail_screen.dart';
-import 'package:provider/provider.dart';
+import 'package:kueski_app/ui/widgets/movie_grid_widget.dart';
+import 'package:kueski_app/ui/widgets/movie_list_widget.dart';
 
 class MoviesWidget extends StatelessWidget {
   final String title;
@@ -12,7 +10,6 @@ class MoviesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var typeViewBloc = TypeViewBloc();
     return Column(
       children: [
         Row(
@@ -32,7 +29,6 @@ class MoviesWidget extends StatelessWidget {
               ),
             ),
             BlocBuilder<TypeViewBloc, TypeViewState>(
-              bloc: typeViewBloc,
               builder: (context, state) {
                 IconData icon;
                 if (state == TypeViewState.listView) {
@@ -43,7 +39,10 @@ class MoviesWidget extends StatelessWidget {
                 return IconButton(
                   icon: Icon(icon),
                   onPressed: () {
-                    typeViewBloc.switchListGrid();
+                    BlocProvider.of<TypeViewBloc>(
+                      context,
+                      listen: false,
+                    ).switchListGrid();
                   },
                 );
               },
@@ -52,48 +51,11 @@ class MoviesWidget extends StatelessWidget {
         ),
         Expanded(
           child: BlocBuilder<TypeViewBloc, TypeViewState>(
-            bloc: typeViewBloc,
             builder: (context, state) {
               if (state == TypeViewState.listView) {
-                return FutureBuilder<List<Movie>>(
-                  future: Provider.of<MoviesRepository>(context)
-                      .getNowPlayingMovies(1),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                    List<Movie> movies = snapshot.data!;
-                    return ListView.builder(
-                      itemCount: movies.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(movies[index].title),
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    DetailScreen(movie: movies[index]),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    );
-                  },
-                );
+                return const MovieListWidget();
               } else {
-                return GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                  ),
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text('Item ${index + 1}'),
-                    );
-                  },
-                );
+                return const MovieGridWidget();
               }
             },
           ),
