@@ -50,11 +50,11 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             items: const [
               BottomNavigationBarItem(
-                icon: Icon(Icons.star),
+                icon: Icon(Icons.calendar_month),
                 label: 'Now Playing',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.how_to_vote),
+                icon: Icon(Icons.trending_up),
                 label: 'Popular',
               ),
             ],
