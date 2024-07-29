@@ -1,6 +1,6 @@
 # kueski_app
 
-A MobieDB app client.
+A MovieDB app client.
 
 ## Dependencies
 
