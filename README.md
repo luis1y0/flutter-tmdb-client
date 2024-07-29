@@ -12,12 +12,19 @@ Test dependencies:
 
 ```
 flutter pub add dev:mocktail
+flutter pub add 'dev:integration_test:{"sdk":"flutter"}'
 ```
 
 Running Unit Tests:
 
 ```
 flutter test test/unit_test.dart --dart-define=API_KEY=<key>
+```
+
+Running Integration Tests:
+
+```
+flutter test integration_test --dart-define=API_KEY=<key>
 ```
 
 Execute:
