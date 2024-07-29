@@ -11,23 +11,24 @@ import 'package:kueski_app/ui/screens/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
-late MoviesRepository moviesRepository;
-
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SqliteDbSingleton sqliteDbSingleton = SqliteDbSingleton.instance();
   await sqliteDbSingleton.initialize();
   TmdbMoviesSource tmdbMoviesSource = TmdbMoviesSource(http.Client());
-  moviesRepository = TmdbMoviesRepository(
+  MoviesRepository moviesRepository = TmdbMoviesRepository(
     SqliteMoviesSource(sqliteDbSingleton.database),
     tmdbMoviesSource,
   );
   tmdbMoviesSource.genres = await moviesRepository.getGenres();
-  runApp(const Application());
+  runApp(Application(
+    moviesRepository: moviesRepository,
+  ));
 }
 
 class Application extends StatelessWidget {
-  const Application({super.key});
+  final MoviesRepository moviesRepository;
+  const Application({super.key, required this.moviesRepository});
 
   // This widget is the root of your application.
   @override
