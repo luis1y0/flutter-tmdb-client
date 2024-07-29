@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kueski_app/ui/blocs/pagination_view/pagination_view_bloc.dart';
 import 'package:kueski_app/ui/screens/detail_screen.dart';
+import 'package:kueski_app/ui/widgets/movie_card_widget.dart';
 
 class MovieGridWidget extends StatelessWidget {
   const MovieGridWidget({super.key});
@@ -38,9 +39,8 @@ class MovieGridWidget extends StatelessWidget {
                   child: CircularProgressIndicator(),
                 );
               }
-              return ListTile(
-                leading: Text('${index + 1}'),
-                title: Text(state.movies[index].title),
+              return MovieCardWidget(
+                movie: state.movies[index],
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
