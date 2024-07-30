@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kueski_app/data/models/movie.dart';
 import 'package:kueski_app/domain/entities/movie.dart';
@@ -25,7 +26,7 @@ class MockHttpClient extends Mock implements http.Client {}
 
 void main() {
   late List<Genre> defaultGenres;
-  setUp(() {
+  setUp(() async {
     defaultGenres = [
       Genre(id: 28, name: 'Action'),
       Genre(id: 12, name: 'Abenteuer'),
@@ -47,6 +48,7 @@ void main() {
       Genre(id: 10752, name: 'Kriegsfilm'),
       Genre(id: 37, name: 'Western')
     ];
+    await dotenv.load(fileName: ".env");
   });
   group('Genre', () {
     late List<Genre> testGenres;
